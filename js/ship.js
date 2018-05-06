@@ -1,9 +1,14 @@
 //Describes the spaceship class
-
 function SpaceShip(){
     this.tip_x = 300;
     this.tip_y = 300;
     this.ship_momentum = new Vector(0, 0);
+    this.ship_acceleration = new Vector(0,0);
+    
+    this.teleport_offset = Ship_Height;
+    this.destination_offset = Ship_Height / 3;
+    
+    this.ready_gun_1 = true;
     
     this.create_vertices = function(tip_x, tip_y){
         //Returns Trangle Vertices: Tip, BL, BR as tuples in an array
@@ -11,10 +16,12 @@ function SpaceShip(){
         let BL_y = tip_y + Ship_Height;
         let BR_x = tip_x + Ship_Radius;
         let BR_y = tip_y + Ship_Height;
+        let Back_Ref_x = tip_x;
+        let Back_Ref_y = tip_y + Ship_Height;
         let final_points = [[tip_x, tip_y],
                            [BL_x, BL_y], 
-                           [BR_x, BR_y]
-                           ];
+                           [BR_x, BR_y],
+                            [Back_Ref_x, Back_Ref_y]];
         
         return final_points;
     }
@@ -28,51 +35,130 @@ function SpaceShip(){
                 this.ship_vertices[1][0], this.ship_vertices[1][1],
                 this.ship_vertices[2][0], this.ship_vertices[2][1]);
         
-        //Draw ship weapons as half way points between tip and bottom pieces
-        //vector.mid_point(other);
+        //Draw ship guns
         let tip = new Vector(this.ship_vertices[0][0], this.ship_vertices[0][1]);
-        let BL = new Vector(his.ship_vertices[1][0], this.ship_vertices[1][1]);
-        let BR = new Vector(his.ship_vertices[2][0], this.ship_vertices[2][1]);
+        let BL = new Vector(this.ship_vertices[1][0], this.ship_vertices[1][1]);
+        let BR = new Vector(this.ship_vertices[2][0], this.ship_vertices[2][1]);
         
         let gun_1_base = tip.mid_point(BL);
         let gun_2_base = tip.mid_point(BR);
         
-        //Calculate the tip of the gun by using sin/cos to make a triangle on the side
-        //of the ship, otherwise the guns wont rotate with the whole ship
-        //line();
-        //line();
+        //The base is the half way point on the triangle, and their length is dependent
+        //on the way the ship is facing so that the   y rotate correctly
+        let ship_facing = this.find_ship_facing_direction();
+        
+        if(this.ready_gun_1 == true){
+            var gun_1_tip = gun_1_base.add(ship_facing.mult(13));
+            var gun_2_tip = gun_2_base.add(ship_facing.mult(8));     
+        } else {
+            var gun_1_tip = gun_1_base.add(ship_facing.mult(8));
+            var gun_2_tip = gun_2_base.add(ship_facing.mult(13));  
+        }
+
+        
+        strokeWeight(2);
+        line(gun_1_base.x, gun_1_base.y, gun_1_tip.x, gun_1_tip.y);
+        line(gun_2_base.x, gun_2_base.y, gun_2_tip.x, gun_2_tip.y);
+        
+        this.gun_1_tip = gun_1_tip;
+        this.gun_2_tip = gun_2_tip;
         
     }
     
-    this.boost = function(acceleration_vector){
-        this.ship_momentum = this.ship_momentum.add(acceleration_vector);
+    this.rotate = function(theta){
+        //Remove center of triangle, do rotation, add center back in
+        let convFactor = Math.PI / 180;
+        let new_vertices = [];
+        for(let i = 0; i < this.ship_vertices.length; i++){
+            cur_x = this.ship_vertices[i][0];
+            cur_y = this.ship_vertices[i][1];
+            //Remove Center
+            cur_x -= this.tip_x;
+            cur_y -= this.tip_y + (Ship_Height / 2);
+            new_x = cur_x * Math.cos(theta * convFactor) - cur_y * Math.sin(theta * convFactor);
+            new_y = cur_x * Math.sin(theta * convFactor) + cur_y * Math.cos(theta * convFactor);
+            //Add Center Back In
+            new_x += this.tip_x;
+            new_y += this.tip_y - (Ship_Height / 2);
+            new_vertices.push([new_x, new_y]);
+        }
+        this.ship_vertices = new_vertices;
+        //this.tip_x = new_vertices[0][0];
+        //this.tip_y = new_vertices[0][1];
     }
     
     this.find_ship_facing_direction = function(){
         //Modify the BL point to be directly behind the tip then find
         //The vector between them
         //Then get that vectors unit direction
-        let BL_x = this.ship_vertices[1][0];
-        let BL_y = this.ship_vertices[1][1];
-        BL_x += Ship_Radius;
+        let tip_x = this.ship_vertices[0][0];
+        let tip_y = this.ship_vertices[0][1];
+        let Back_Ref_x = this.ship_vertices[3][0];
+        let Back_Ref_y = this.ship_vertices[3][1];
         
-        back_vector = new Vector(BL_x, BL_y);
-        tip_vector = new Vector(this.tip_x, this.tip_y);
+        back_vector = new Vector(Back_Ref_x, Back_Ref_y);
+        tip_vector = new Vector(tip_x, tip_y);
         let direction = tip_vector.sub(back_vector);
         direction = direction.unit_direction();
         
         return direction;
     }
     
-    this.update = function(){
-        this.tip_x += this.ship_momentum.x;
-        this.tip_y += this.ship_momentum.y;
-        
-        this.ship_vertices = this.create_vertices(this.tip_x, this.tip_y);
+    this.shoot = function(){
+        if(this.ready_gun_1 == true){
+            direction = this.find_ship_facing_direction();
+            new_bullet = new Bullet(this.gun_1_tip.x, this.gun_1_tip.y, direction);
+            this.ready_gun_1 = false;
+        } else {
+            direction = this.find_ship_facing_direction();
+            new_bullet = new Bullet(this.gun_2_tip.x, this.gun_2_tip.y, direction);
+            this.ready_gun_1 = true;
+        }
+        return new_bullet;
     }
     
-    this.run = function(){
+    this.loop_position = function(){
+        center_x = this.tip_x;
+        center_y = this.tip_y + (Ship_Height / 2);
+        let loop = false;
+        if(center_x >= Canvas_Width + this.teleport_offset){
+            loop = true;
+            this.tip_x = 0 - this.destination_offset;
+        } else if(center_x <= 0 - this.teleport_offset){
+            loop = true; 
+            this.tip_x = Canvas_Width + this.destination_offset;
+        } else if(center_y >= Canvas_Height + this.teleport_offset + (Ship_Height / 2)){
+            loop = true; 
+            this.tip_y = 0 - this.destination_offset - Ship_Height;
+            //PROBLEM IS HERE
+        } else if(center_y <= 0 - this.teleport_offset){
+            loop = true; 
+            this.tip_y = Canvas_Height + this.destination_offset;
+        }
+        if (loop == true){
+            
+            this.ship_vertices = this.create_vertices(this.tip_x, this.tip_y);
+        }
+                  
+        
+    }
+    
+    this.update = function(){
+        this.ship_momentum = this.ship_momentum.add(this.ship_acceleration);
+        this.tip_x += this.ship_momentum.x;
+        this.tip_y += this.ship_momentum.y;
+        this.ship_acceleration = new Vector(0, 0);
+    }
+    
+    this.boost = function(acceleration_vector){
+        this.ship_acceleration = acceleration_vector;
+    }
+    
+    this.run = function(theta){
+        this.ship_vertices = this.create_vertices(this.tip_x, this.tip_y);
+        this.rotate(theta);
         this.update();
+        this.loop_position();
         this.show();
     }
 }

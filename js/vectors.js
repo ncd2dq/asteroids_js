@@ -46,6 +46,7 @@ function Vector(x, y){
     this.mid_point = function(other){
         let difference = this.sub(other);
         difference = difference.mult(0.5);
+        difference = difference.add(other);
         
         return difference;
     }
