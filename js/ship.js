@@ -31,8 +31,8 @@ function SpaceShip(){
         //Draw ship weapons as half way points between tip and bottom pieces
         //vector.mid_point(other);
         let tip = new Vector(this.ship_vertices[0][0], this.ship_vertices[0][1]);
-        let BL = new Vector(his.ship_vertices[1][0], this.ship_vertices[1][1]);
-        let BR = new Vector(his.ship_vertices[2][0], this.ship_vertices[2][1]);
+        let BL = new Vector(this.ship_vertices[1][0], this.ship_vertices[1][1]);
+        let BR = new Vector(this.ship_vertices[2][0], this.ship_vertices[2][1]);
         
         let gun_1_base = tip.mid_point(BL);
         let gun_2_base = tip.mid_point(BR);
