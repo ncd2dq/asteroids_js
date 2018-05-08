@@ -4,6 +4,7 @@ function SpaceShip(){
     this.tip_y = 300;
     this.ship_momentum = new Vector(0, 0);
     this.ship_acceleration = new Vector(0,0);
+    this.crashed = false;
     
     this.teleport_offset = Ship_Height;
     this.destination_offset = Ship_Height / 3;
@@ -18,10 +19,13 @@ function SpaceShip(){
         let BR_y = tip_y + Ship_Height;
         let Back_Ref_x = tip_x;
         let Back_Ref_y = tip_y + Ship_Height;
+        let center_x = tip_x;
+        let center_y = tip_y + Ship_Height / 2;
         let final_points = [[tip_x, tip_y],
                            [BL_x, BL_y], 
                            [BR_x, BR_y],
-                            [Back_Ref_x, Back_Ref_y]];
+                            [Back_Ref_x, Back_Ref_y],
+                           [center_x, center_y]];
         
         return final_points;
     }
@@ -143,6 +147,24 @@ function SpaceShip(){
         
     }
     
+    this.collide = function(asteroid_list){
+        for(let i = 0; i < asteroid_list.length; i++){
+            let right_side = Math.pow(asteroid_list[i].radius, 2) / 3;
+            for(let j = 0; j < this.ship_vertices.length; j++){
+                try{
+                    let left_side = Math.pow((this.ship_vertices[j][0] - asteroid_list[i].x), 2) + Math.pow((this.ship_vertices[j][1] - asteroid_list[i].y), 2);
+                    if(left_side < right_side){
+                        this.crashed = true;  
+                    }
+                }
+                catch(err){
+                    //for some reason it says cannot read property x of undefined on line 155 sometimes
+                    console.log(err);
+                }
+            }
+        }
+    }
+    
     this.update = function(){
         this.ship_momentum = this.ship_momentum.add(this.ship_acceleration);
         this.tip_x += this.ship_momentum.x;
@@ -154,9 +176,10 @@ function SpaceShip(){
         this.ship_acceleration = acceleration_vector;
     }
     
-    this.run = function(theta){
+    this.run = function(theta, asteroid_list){
         this.ship_vertices = this.create_vertices(this.tip_x, this.tip_y);
         this.rotate(theta);
+        this.collide(asteroid_list);
         this.update();
         this.loop_position();
         this.show();

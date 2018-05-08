@@ -9,10 +9,12 @@ let ship = new SpaceShip();
 
 let bullets = [];
 let asteroids = [];
-let asteroid_count = 5;
+let asteroid_count = 1;
 
 let theta = 0;
 let theta_change = 0;
+
+let game = new gameStats(Canvas_Width, Canvas_Height);
 
 function setup() {
     createCanvas(Canvas_Width, Canvas_Height);
@@ -20,20 +22,13 @@ function setup() {
     for(let i = 0; i < asteroid_count; i++){
         asteroids.push(new Asteroid(Canvas_Width, Canvas_Height));
     }
+    //Handle game levels
 }
 
 
 function draw() {
-    background(255, 0, 255);
-    ship.run(theta);
-    
-    //Display asteroids
-    if(asteroids.length != 0){
-        for(let i = 0; i < asteroids.length; i++){
-            asteroids[i].run();
-        }
-    }
-    
+    background(125, 100, 125);
+
     //Display bullets
     if(bullets.length != 0){
         for(let i = 0; i < bullets.length; i++){
@@ -45,11 +40,57 @@ function draw() {
         for(let i = 0; i < bullets.length; i++){
             if(bullets[i].fuel <= 0){
                 bullets.splice(i, 1);
+            } else if(bullets[i].crashed == true){
+                bullets.splice(i, 1);
             }
         }
     }
     
+    //Display asteroids and make babies
+    if(asteroids.length != 0){
+        for(let i = 0; i < asteroids.length; i++){
+            asteroids[i].run(bullets);
+            if(asteroids[i].crashed == true){
+                asteroids[i].make_babies(asteroids);
+                game.score++;
+            } 
+        }
+    }
+
+    if(asteroids.length != 0){
+        for(let i = 0; i < asteroids.length; i++){
+            if(asteroids[i].crashed == true){
+                asteroids.splice(i, 1);
+            } else if(asteroids[i].size <= 0){
+                asteroids.splice(i, 1);
+            }
+        }
+    }
+    
+    //Handle score / level projection
+    game.score_keep();
+    ship.run(theta, asteroids);
+    //Handle ship rotations
     theta += theta_change;
+    
+    if(asteroids.length == 0){
+        game.nextLevel();
+        noLoop();
+        ship = new SpaceShip();
+        bullets = [];
+        asteroid_count += 2;
+        for(let i = 0; i < asteroid_count; i++){
+            asteroids.push(new Asteroid(Canvas_Width, Canvas_Height));
+        }
+        setTimeout(loop, 3000);
+        
+    }
+    
+    if(ship.crashed == true){
+        game.crashed();
+        noLoop();
+        setTimeout(window.location.reload.bind(window.location), 3000)
+    }
 }
 
 
