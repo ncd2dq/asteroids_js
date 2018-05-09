@@ -52,7 +52,6 @@ function draw() {
             asteroids[i].run(bullets);
             if(asteroids[i].crashed == true){
                 asteroids[i].make_babies(asteroids);
-                game.score++;
             } 
         }
     }
@@ -63,6 +62,7 @@ function draw() {
                 asteroids.splice(i, 1);
             } else if(asteroids[i].size <= 0){
                 asteroids.splice(i, 1);
+                game.score++;
             }
         }
     }
