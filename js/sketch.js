@@ -16,6 +16,8 @@ let theta_change = 0;
 
 let game = new gameStats(Canvas_Width, Canvas_Height);
 
+let acceleration_vector = new Vector(0, 0);
+
 function setup() {
     createCanvas(Canvas_Width, Canvas_Height);
     //Add asteroids
@@ -69,7 +71,8 @@ function draw() {
     
     //Handle score / level projection
     game.score_keep();
-    ship.run(theta, asteroids);
+    ship.run(theta, asteroids, bullets);
+    acceleration_vector = ship.find_ship_facing_direction();
     //Handle ship rotations
     theta += theta_change;
     
@@ -105,16 +108,15 @@ function keyPressed(){
         theta_change = 5;
         
     } else if (keyCode === DOWN_ARROW){
-        acceleration_vector = ship.find_ship_facing_direction();
-        acceleration_vector = acceleration_vector.mult(-1);
-        ship.boost(acceleration_vector);
+        ship.boosting = true;
+        ship.forward = true;
         
     } else if (keyCode === UP_ARROW){
-        acceleration_vector = ship.find_ship_facing_direction();
-        ship.boost(acceleration_vector);
+        ship.boosting = true;
+        ship.forward = false;
+        
     } else if (keyCode == 32){
-        bullet = ship.shoot();
-        bullets.push(bullet);
+        ship.shooting = true;
     }
 }
 
@@ -126,5 +128,11 @@ function keyReleased(){
     } else if (keyCode === RIGHT_ARROW){
         //direction = [1, 0];
         theta_change = 0;
+    } else if (keyCode === UP_ARROW || keyCode === DOWN_ARROW){
+        ship.boosting = false;
+        acceleration_vector = new Vector(0, 0);
+    } else if (keyCode == 32){
+        ship.shooting = false;
+        ship.fire_rate_frame = 0;
     }
 }

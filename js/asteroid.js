@@ -108,6 +108,7 @@ function Asteroid(width, height, size=4){
     
     this.show = function(){
         if(this.size >= 1){
+        fill(0, 255, 255);
         ellipse(this.x, this.y, this.radius, this.radius);
         }
     }

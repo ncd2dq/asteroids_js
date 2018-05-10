@@ -5,6 +5,12 @@ function SpaceShip(){
     this.ship_momentum = new Vector(0, 0);
     this.ship_acceleration = new Vector(0,0);
     this.crashed = false;
+    this.boosting = false;
+    this.forward = true;
+    this.gravity_loss = 0.03;
+    
+    this.shooting = false;
+    this.fire_rate_frame = 0;
     
     this.teleport_offset = Ship_Height;
     this.destination_offset = Ship_Height / 3;
@@ -108,17 +114,23 @@ function SpaceShip(){
         return direction;
     }
     
-    this.shoot = function(){
-        if(this.ready_gun_1 == true){
-            direction = this.find_ship_facing_direction();
-            new_bullet = new Bullet(this.gun_1_tip.x, this.gun_1_tip.y, direction);
-            this.ready_gun_1 = false;
-        } else {
-            direction = this.find_ship_facing_direction();
-            new_bullet = new Bullet(this.gun_2_tip.x, this.gun_2_tip.y, direction);
-            this.ready_gun_1 = true;
+    this.shoot = function(bullet_list){
+        if (this.shooting){
+            if(this.fire_rate_frame % 6 == 0){
+                
+                if(this.ready_gun_1 == true){
+                    direction = this.find_ship_facing_direction();
+                    new_bullet = new Bullet(this.gun_1_tip.x, this.gun_1_tip.y, direction);
+                    this.ready_gun_1 = false;
+                } else {
+                    direction = this.find_ship_facing_direction();
+                    new_bullet = new Bullet(this.gun_2_tip.x, this.gun_2_tip.y, direction);
+                    this.ready_gun_1 = true;
+                }
+                bullet_list.push(new_bullet);
+            }
+        this.fire_rate_frame++;
         }
-        return new_bullet;
     }
     
     this.loop_position = function(){
@@ -166,6 +178,7 @@ function SpaceShip(){
     }
     
     this.update = function(){
+        this.ship_momentum = this.ship_momentum.mult((1 - this.gravity_loss));
         this.ship_momentum = this.ship_momentum.add(this.ship_acceleration);
         this.tip_x += this.ship_momentum.x;
         this.tip_y += this.ship_momentum.y;
@@ -173,10 +186,18 @@ function SpaceShip(){
     }
     
     this.boost = function(acceleration_vector){
-        this.ship_acceleration = acceleration_vector;
+        acceleration_vector = acceleration_vector.mult(0.25)
+        if(this.forward){
+            acceleration_vector = acceleration_vector.mult(-1);
+        }
+        if (this.boosting){
+            this.ship_acceleration = acceleration_vector;              
+        }
     }
     
-    this.run = function(theta, asteroid_list){
+    this.run = function(theta, asteroid_list, bullet_list){
+        this.boost(acceleration_vector);
+        this.shoot(bullet_list);
         this.ship_vertices = this.create_vertices(this.tip_x, this.tip_y);
         this.rotate(theta);
         this.collide(asteroid_list);
