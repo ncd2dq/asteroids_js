@@ -159,19 +159,26 @@ function SpaceShip(){
         
     }
     
-    this.collide = function(asteroid_list){
+    this.collide = function(asteroid_list, buffer=Ship_Height){
+        
+        //ellipse(this.ship_vertices[4][0], this.ship_vertices[4][1], buffer * 1.5, buffer * 1.5); // For debugging - shows range that it calculates vertices collide
+        
         for(let i = 0; i < asteroid_list.length; i++){
-            let right_side = Math.pow(asteroid_list[i].radius, 2) / 3;
-            for(let j = 0; j < this.ship_vertices.length; j++){
-                try{
-                    let left_side = Math.pow((this.ship_vertices[j][0] - asteroid_list[i].x), 2) + Math.pow((this.ship_vertices[j][1] - asteroid_list[i].y), 2);
-                    if(left_side < right_side){
-                        this.crashed = true;  
+            if( sqrt(Math.pow((asteroid_list[i].x - this.ship_vertices[4][0]), 2) + 
+                     Math.pow((asteroid_list[i].y - this.ship_vertices[4][1]), 2)) < buffer * 1.5 ){ // Only check collision with all vertices if asteroid is within certain radius
+               
+                let right_side = Math.pow(asteroid_list[i].radius, 2) / 3;
+                for(let j = 0; j < this.ship_vertices.length; j++){
+                    try{
+                        let left_side = Math.pow((this.ship_vertices[j][0] - asteroid_list[i].x), 2) + Math.pow((this.ship_vertices[j][1] - asteroid_list[i].y), 2);
+                        if(left_side < right_side){
+                            this.crashed = true;  
+                        }
                     }
-                }
-                catch(err){
-                    //for some reason it says cannot read property x of undefined on line 155 sometimes
-                    console.log(err);
+                    catch(err){
+                        //for some reason it says cannot read property x of undefined on line 155 sometimes
+                        console.log(err);
+                    }
                 }
             }
         }

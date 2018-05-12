@@ -74,6 +74,7 @@ function draw() {
     
     //Handle score / level projection
     game.score_keep();
+    //Handle ship interactions
     ship.run(theta, asteroids, bullets);
     acceleration_vector = ship.find_ship_facing_direction();
     //Handle ship rotations

@@ -53,6 +53,7 @@ function Asteroid(width, height, size=4){
     }
     
     this.bullet_hit = function(bullet_list){
+        
         for(let i =0; i < bullet_list.length; i++){
             //(x - h)**2 + (y - k)**2 <= r**2
             let left_side = Math.pow((this.x - bullet_list[i].location.x), 2) + Math.pow((this.y - bullet_list[i].location.y), 2);
@@ -61,7 +62,6 @@ function Asteroid(width, height, size=4){
                 this.crashed = true;
                 bullet_list[i].crashed = true;
             }
-            
         }
     }
     
