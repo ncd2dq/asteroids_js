@@ -10,7 +10,7 @@ function gameStats(width, height){
     
     this.instruction1 = "Press or hold the spacebar to fire";
     this.instruction2 = "Press or hold the arrow keys to move";
-    this.instruction3 = "Press 'P' to play";
+    this.instruction3 = "Press 'P' to play or pause at anytime";
     
     this.paused = true;
     
