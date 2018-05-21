@@ -21,6 +21,8 @@ game.calculate_asteroid_count(initial_asteroid_count, asteroid_increment, game.l
 
 let acceleration_vector = new Vector(0, 0);
 
+let developer_mode = false;
+
 function setup() {
     createCanvas(Canvas_Width, Canvas_Height);
     //Add asteroids
@@ -109,6 +111,9 @@ function draw() {
 
 // User input
 function keyPressed(){
+    if(developer_mode){
+        console.log(keyCode);
+    }
     if (keyCode === LEFT_ARROW){
         //direction = [-1, 0];
         theta_change = -5;
@@ -138,6 +143,10 @@ function keyPressed(){
 }
 
 function keyReleased(){
+    if(developer_mode){
+        console.log(keyCode);
+    }
+    
     if (keyCode === LEFT_ARROW){
         //direction = [-1, 0];
         theta_change = 0;
