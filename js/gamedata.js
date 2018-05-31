@@ -31,7 +31,7 @@ function gameStats(width, height){
         
     this.score_keep = function(){
         textSize(25);
-        fill(0, 102, 153);
+        fill(all_other_color);
         text("Score: " + this.score, this.width - 160, 30);
         text("Level: " + this.level, 25, 30);
         text("Asteroids: " + this.asteroid_count, 25, 55);

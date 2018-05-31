@@ -2,6 +2,10 @@ let Ship_Height = 45;
 let Ship_Radius = 18;
 let Ship_Gun_Length = 5;
 
+let background_color;
+let asteroid_color;
+let all_other_color;
+
 let Canvas_Width = 600;
 let Canvas_Height = 600;
 
@@ -25,6 +29,9 @@ let developer_mode = false;
 
 function setup() {
     createCanvas(Canvas_Width, Canvas_Height);
+    background_color = color(125, 100, 125);
+    asteroid_color = color(0, 255, 255);
+    all_other_color = color(0, 102, 153);
     //Add asteroids
     for(let i = 0; i < asteroid_count; i++){
         asteroids.push(new Asteroid(Canvas_Width, Canvas_Height));
@@ -33,7 +40,7 @@ function setup() {
 
 
 function draw() {
-    background(125, 100, 125);
+    background(background_color);
 
     //Display bullets
     if(bullets.length != 0){
